@@ -1,0 +1,6 @@
+dist
+coverage
+*.tgz
+node_modules
+package-lock.json
+envpeek — One-Pass AI Coding Agent Prompt.md

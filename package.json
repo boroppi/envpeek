@@ -1,0 +1,53 @@
+{
+  "name": "envpeek",
+  "version": "0.1.0",
+  "description": "Safely inspect .env files without accidentally exposing secrets.",
+  "type": "module",
+  "license": "MIT",
+  "author": "boroppi",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boroppi/envpeek.git"
+  },
+  "bugs": {
+    "url": "https://github.com/boroppi/envpeek/issues"
+  },
+  "homepage": "https://github.com/boroppi/envpeek#readme",
+  "bin": {
+    "envpeek": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [
+    "env",
+    "dotenv",
+    "cli",
+    "secrets",
+    "security",
+    "gitignore"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^4.1.10"
+  }
+}
