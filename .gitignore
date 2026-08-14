@@ -7,4 +7,4 @@ coverage/
 !.env.example
 !fixtures/**
 .envpeek.json
-*One-Pass AI Coding Agent Prompt.md
+
