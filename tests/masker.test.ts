@@ -36,6 +36,32 @@ describe('masker', () => {
     expect(maskValue('https://api.example.com', 'public', false)).toBe('https://api.example.com');
   });
 
+  it('masks userinfo even when the name looks unknown', () => {
+    const masked = maskValue(
+      'postgresql://postgres:REAL_DB_PASSWORD@db.example.supabase.co:5432/postgres',
+      'unknown',
+      false,
+    );
+    expect(masked).not.toContain('REAL_DB_PASSWORD');
+    expect(masked).not.toContain('postgres:');
+    expect(masked).toContain('db.example.supabase.co');
+  });
+
+  it('masks Supabase secret key prefixes', () => {
+    const masked = maskValue('sb_secret_abcdefghijklmnopqrstuvwxyz', 'token', false);
+    expect(masked.startsWith('sb_secret_')).toBe(true);
+    expect(masked).not.toContain('abcdefghijklmnopqrstuvwxyz');
+  });
+
+  it('masks OpenAI and Stripe webhook prefixes', () => {
+    expect(maskValue('sk-proj-abcdefghijklmnopqrstuvwxyz', 'token', false)).not.toContain(
+      'abcdefghijklmnopqrstuvwxyz',
+    );
+    expect(maskValue('whsec_abcdefghijklmnopqrstuvwxyz', 'token', false)).not.toContain(
+      'abcdefghijklmnopqrstuvwxyz',
+    );
+  });
+
   it('masks public variables that look like credentials', () => {
     const masked = maskValue('not-a-real-public-key-value', 'public', false, true);
     expect(masked).toBe(MASK);

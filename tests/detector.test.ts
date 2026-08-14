@@ -17,6 +17,16 @@ describe('detector', () => {
     expect(detectName('PRIVATE_KEY')).toBe('private-key');
     expect(detectName('DATABASE_URL')).toBe('database-credential');
     expect(detectName('JWT_SECRET')).toBe('secret');
+    expect(detectName('SUPABASE_SERVICE_ROLE_KEY')).toBe('credential');
+    expect(detectName('SERVICE_ROLE_KEY')).toBe('credential');
+    expect(detectName('DIRECT_URL')).toBe('database-credential');
+    expect(detectName('APP_KEY')).toBe('credential');
+    expect(detectName('RAILS_MASTER_KEY')).toBe('credential');
+    expect(detectName('POSTGRES_URL_NON_POOLING')).toBe('database-credential');
+    expect(detectName('SENTRY_DSN')).toBe('credential');
+    expect(detectName('PGPASSWORD')).toBe('password');
+    expect(detectName('PRIMARY_KEY')).toBeNull();
+    expect(detectName('ANON_KEY')).toBeNull();
   });
 
   it('detects public prefixes', () => {
@@ -37,6 +47,10 @@ describe('detector', () => {
     );
     expect(detectValue('-----BEGIN RSA PRIVATE KEY-----\nfake')).toBe('private-key');
     expect(detectValue('-----BEGIN OPENSSH PRIVATE KEY-----\nfake')).toBe('private-key');
+    expect(detectValue('sb_secret_abcdefghijklmnopqrstuvwxyz')).toBe('token');
+    expect(detectValue('sk-proj-abcdefghijklmnopqrstuvwxyz')).toBe('token');
+    expect(detectValue('whsec_abcdefghijklmnopqrstuvwxyz')).toBe('token');
+    expect(detectValue('{"type":"service_account"}')).toBe('private-key');
   });
 
   it('matches simple wildcards', () => {

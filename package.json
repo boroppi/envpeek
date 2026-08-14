@@ -1,6 +1,6 @@
 {
   "name": "envpeek",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Safely inspect .env files without accidentally exposing secrets.",
   "type": "module",
   "license": "MIT",

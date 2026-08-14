@@ -13,6 +13,12 @@ describe('classifier', () => {
       'database-credential',
     );
     expect(classify('JWT_SECRET', 'x').classification).toBe('secret');
+    expect(classify('SUPABASE_SERVICE_ROLE_KEY', 'x').classification).toBe('credential');
+    expect(classify('SERVICE_ROLE_KEY', 'x').classification).toBe('credential');
+    expect(classify('SUPABASE_SERVICE_KEY', 'x').classification).toBe('credential');
+    expect(classify('DIRECT_URL', 'postgresql://localhost/db').classification).toBe(
+      'database-credential',
+    );
   });
 
   it('classifies public prefixes as public', () => {
@@ -44,5 +50,53 @@ describe('classifier', () => {
 
   it('applies custom wildcard patterns', () => {
     expect(classify('FOO_CREDENTIAL', 'x', ['*_CREDENTIAL']).classification).toBe('secret');
+  });
+
+  it('masks common SaaS and framework secrets that are easy to miss', () => {
+    const sensitive: Array<[string, string]> = [
+      ['APP_KEY', 'credential'],
+      ['RAILS_MASTER_KEY', 'credential'],
+      ['ALGOLIA_ADMIN_KEY', 'credential'],
+      ['NEXTAUTH_SECRET', 'secret'],
+      ['AUTH_SECRET', 'secret'],
+      ['OPENAI_API_KEY', 'credential'],
+      ['ANTHROPIC_API_KEY', 'credential'],
+      ['STRIPE_WEBHOOK_SECRET', 'secret'],
+      ['CLERK_SECRET_KEY', 'secret'],
+      ['RESEND_API_KEY', 'credential'],
+      ['PGPASSWORD', 'password'],
+      ['POSTGRES_URL_NON_POOLING', 'database-credential'],
+      ['DATABASE_URL_UNPOOLED', 'database-credential'],
+      ['POSTGRES_PRISMA_URL', 'database-credential'],
+      ['MONGO_URL', 'database-credential'],
+      ['SENTRY_DSN', 'credential'],
+      ['SMTP_PASSPHRASE', 'password'],
+    ];
+
+    for (const [name, expected] of sensitive) {
+      expect(classify(name, 'x').classification, name).toBe(expected);
+    }
+  });
+
+  it('leaves public or schema-like keys visible', () => {
+    expect(classify('SUPABASE_ANON_KEY', 'x').classification).toBe('unknown');
+    expect(classify('CLERK_PUBLISHABLE_KEY', 'not-a-known-prefix').classification).toBe('unknown');
+    expect(classify('PRIMARY_KEY', 'id').classification).toBe('unknown');
+    expect(classify('FEATURE_FLAG', 'on').classification).toBe('unknown');
+    expect(classify('NEXT_PUBLIC_SUPABASE_URL', 'https://x.supabase.co').classification).toBe(
+      'public',
+    );
+  });
+
+  it('treats well-known secret value prefixes as tokens', () => {
+    expect(classify('FOO', 'sk-proj-abcdefghijklmnopqrstuvwxyz').classification).toBe('token');
+    expect(classify('FOO', 'sk-ant-api03-abcdefghijklmnopqrstuvwxyz').classification).toBe('token');
+    expect(classify('FOO', 'whsec_abcdefghijklmnopqrstuvwxyz').classification).toBe('token');
+    expect(classify('FOO', 'gsk_abcdefghijklmnopqrstuvwxyz').classification).toBe('token');
+  });
+
+  it('treats service-account JSON as a private key', () => {
+    const value = '{"type":"service_account","private_key":"-----BEGIN PRIVATE KEY-----\\nfake"}';
+    expect(classify('GOOGLE_CREDENTIALS', value).classification).toBe('private-key');
   });
 });

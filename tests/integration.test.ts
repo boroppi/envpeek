@@ -25,7 +25,32 @@ describe('integration', () => {
 
     const version = await run({ argv: ['--version'], cwd: dir });
     expect(version.exitCode).toBe(EXIT.OK);
-    expect(version.stdout.trim()).toBe('0.1.0');
+    expect(version.stdout.trim()).toBe('0.1.1');
+  });
+
+  it('masks Supabase service role keys in default output', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'envpeek-supabase-'));
+    await writeFile(
+      join(dir, '.env'),
+      [
+        'NEXT_PUBLIC_SUPABASE_URL=https://xyz.supabase.co',
+        'SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.FAKE_SERVICE_ROLE',
+        'DIRECT_URL=postgresql://postgres:REAL_DB_PASSWORD@db.xyz.supabase.co:5432/postgres',
+        '',
+      ].join('\n'),
+    );
+    const result = await run({
+      argv: [],
+      cwd: dir,
+      stdoutIsTTY: false,
+      stdinIsTTY: false,
+    });
+    expect(result.exitCode).toBe(EXIT.OK);
+    const combined = result.stdout + result.stderr;
+    expect(combined).toContain('https://xyz.supabase.co');
+    expect(combined).not.toContain('FAKE_SERVICE_ROLE');
+    expect(combined).not.toContain('REAL_DB_PASSWORD');
+    expect(combined).not.toContain('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
   });
 
   it('masks secrets in default, JSON, and CI output', async () => {

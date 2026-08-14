@@ -103,8 +103,12 @@ Classification is based on:
 1. Value shape (PEM / OpenSSH private keys, well-known token prefixes)
 2. Custom wildcard patterns from `.envpeek.json`
 3. Public prefixes: `NEXT_PUBLIC_`, `VITE_`, `PUBLIC_`, `NUXT_PUBLIC_`
-4. Name tokens such as `PASSWORD`, `SECRET`, `TOKEN`, `API_KEY`, `PRIVATE_KEY`, `DATABASE_URL`, `JWT_SECRET`
-5. Otherwise `unknown`
+4. Name tokens such as `PASSWORD`, `SECRET`, `TOKEN`, `API_KEY`, `PRIVATE_KEY`, `DATABASE_URL`, `JWT_SECRET`, `SERVICE_ROLE_KEY`, `APP_KEY`, `MASTER_KEY`, `DSN`
+5. Database-style names even in the middle of a name (`POSTGRES_URL_NON_POOLING`, `DATABASE_URL_UNPOOLED`)
+6. Well-known secret prefixes such as `sk_live_`, `sk-proj-`, `sk-ant-`, `sb_secret_`, `whsec_`, `gsk_`
+7. Otherwise `unknown`. URLs with userinfo (`user:password@host`) are masked even when the name is unknown.
+
+Names such as `ANON_KEY`, `PUBLISHABLE_KEY`, and `PRIMARY_KEY` are not treated as secrets.
 
 Language in the UI is probabilistic (`appears sensitive`, `likely secret`, `possibly public`) except for private-key PEM detection, which is treated as deterministic.
 
@@ -136,7 +140,7 @@ If a file is tracked, envpeek prints a high-priority warning and still does **no
 | `envpeek <file>` | Inspect that file |
 | `envpeek --file <file>` | Same as the positional form |
 | `envpeek --help` | Show help |
-| `envpeek --version` | Print `0.1.0` (from `package.json`) |
+| `envpeek --version` | Print the version from `package.json` |
 
 Do not combine a positional path with `--file`.
 

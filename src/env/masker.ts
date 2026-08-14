@@ -28,7 +28,7 @@ export function maskValue(
   const mustMask = forceMask || SENSITIVE.has(classification);
 
   if (!mustMask) {
-    return maskIfUrlHasSensitiveQuery(rawValue) ?? rawValue;
+    return maskUrl(rawValue, false) ?? rawValue;
   }
 
   const tokenMasked = maskKnownTokenPrefix(rawValue);
